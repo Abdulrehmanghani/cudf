@@ -135,7 +135,7 @@ function buildLibCudfJniInDocker {
         --workdir "$workspaceRepoDir/java/target/libcudf-cmake-build" \
         ${imageName} \
         scl enable devtoolset-9 \
-            "cmake $workspaceRepoDir/cpp \
+            "/opt/airflow/cmake/bin/cmake $workspaceRepoDir/cpp \
                 -G${CMAKE_GENERATOR} \
                 -DCMAKE_C_COMPILER_LAUNCHER=ccache \
                 -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
@@ -153,7 +153,7 @@ function buildLibCudfJniInDocker {
                 -DCUDF_USE_PER_THREAD_DEFAULT_STREAM=ON \
                 -DRMM_LOGGING_LEVEL=OFF \
                 -DBUILD_SHARED_LIBS=OFF && \
-             cmake --build . --parallel ${PARALLEL_LEVEL} && \
+             /opt/airflow/cmake/bin/cmake --build . --parallel ${PARALLEL_LEVEL} && \
              cd $workspaceRepoDir/java && \
              mvn ${MVN_PHASES:-"package"} \
                 -Dmaven.repo.local=$workspaceMavenRepoDir \
@@ -278,7 +278,7 @@ if buildAll || hasArg libcudf; then
         sccache --zero-stats
     fi
 
-    cmake -S $REPODIR/cpp -B ${LIB_BUILD_DIR} \
+    /opt/airflow/cmake/bin/cmake -S $REPODIR/cpp -B ${LIB_BUILD_DIR} \
           -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} \
           -DCMAKE_CUDA_ARCHITECTURES=${CUDF_CMAKE_CUDA_ARCHITECTURES} \
           -DUSE_NVTX=${BUILD_NVTX} \
@@ -293,7 +293,7 @@ if buildAll || hasArg libcudf; then
     cd ${LIB_BUILD_DIR}
 
     compile_start=$(date +%s)
-    cmake --build . -j${PARALLEL_LEVEL} ${VERBOSE_FLAG}
+    /opt/airflow/cmake/bin/cmake --build . -j${PARALLEL_LEVEL} ${VERBOSE_FLAG}
     compile_end=$(date +%s)
     compile_total=$(( compile_end - compile_start ))
 
@@ -321,7 +321,7 @@ if buildAll || hasArg libcudf; then
     fi
 
     if [[ ${INSTALL_TARGET} != "" ]]; then
-        cmake --build . -j${PARALLEL_LEVEL} --target install ${VERBOSE_FLAG}
+        /opt/airflow/cmake/bin/cmake --build . -j${PARALLEL_LEVEL} --target install ${VERBOSE_FLAG}
     fi
 fi
 
@@ -362,7 +362,7 @@ fi
 
 # Build libcudf_kafka library
 if hasArg libcudf_kafka; then
-    cmake -S $REPODIR/cpp/libcudf_kafka -B ${KAFKA_LIB_BUILD_DIR} \
+    /opt/airflow/cmake/bin/cmake -S $REPODIR/cpp/libcudf_kafka -B ${KAFKA_LIB_BUILD_DIR} \
           -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} \
           -DBUILD_TESTS=${BUILD_TESTS} \
           -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
@@ -370,10 +370,10 @@ if hasArg libcudf_kafka; then
 
 
     cd ${KAFKA_LIB_BUILD_DIR}
-    cmake --build . -j${PARALLEL_LEVEL} ${VERBOSE_FLAG}
+    /opt/airflow/cmake/bin/cmake --build . -j${PARALLEL_LEVEL} ${VERBOSE_FLAG}
 
     if [[ ${INSTALL_TARGET} != "" ]]; then
-        cmake --build . -j${PARALLEL_LEVEL} --target install ${VERBOSE_FLAG}
+        /opt/airflow/cmake/bin/cmake --build . -j${PARALLEL_LEVEL} --target install ${VERBOSE_FLAG}
     fi
 fi
 
